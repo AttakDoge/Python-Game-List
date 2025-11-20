@@ -1,0 +1,10 @@
+{
+    "game1":{
+        "tags": ["a","b","c","d"],
+        "rating": 10
+    },
+    "game2":{
+        "tags": ["e","f","g"],
+        "rating": 1
+    }
+}
