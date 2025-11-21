@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import os
+import pyperclip as pc
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll, Horizontal # how do these work
 from textual.widgets import Footer, RadioButton, RadioSet, Label, Button, Markdown
@@ -15,6 +16,8 @@ exe = ''
 top_title = """\
 ## Game Selector
 """
+website = ''
+
 class test(App):
     BINDINGS = [('Q', 'quit', 'Quit')]
     def compose(self) -> ComposeResult:
@@ -33,7 +36,10 @@ class test(App):
             yield Label("Tags: ", id="tags")
             yield Label("Date added: ", id='date_added')
             yield Label("Rating: ", id='rating')
-            yield Button("Launch Game", id='launch', variant='primary') # button to launch game
+            yield Label("Game Website: ", id="website")
+            with Horizontal(): # place buttons next to each other
+                yield Button("Launch Game", id='launch', variant='primary') # button to launch game
+                yield Button("Copy Website Link", id="copy", variant="primary") # button to copy website to clipboard
         yield Footer()
     
     def action_quit(self):
@@ -46,9 +52,7 @@ class test(App):
         #self.query_one('#prs', Label).update(acbc[event.radio_set.pressed_index])
         '''
 
-        global game_data
-        global launch_loc
-        global exe
+        global game_data, launch_loc, exe, website
         game = game_data.iloc[event.radio_set.pressed_index]
 
         self.query_one('#name', Label).update("Game Name: " + game['name'])
@@ -58,11 +62,12 @@ class test(App):
         self.query_one('#rating', Label).update("Rating: " + stars(game['rating']))
         launch_loc = game['path_to_game']
         exe = game['game_exe']
+        self.query_one("#website", Label).update("Game Website: " + game['page_link'])
+        website = game['page_link']
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == 'launch':
-            global launch_loc
-            global exe
+            global launch_loc, exe, website
             if not(launch_loc == ''):
                 self.notify(message='Placeholder, will launch app in future: ' + launch_loc + exe)
                 # code not ready yet to test, no actual testing data yet
@@ -78,5 +83,11 @@ class test(App):
                 '''
             else:
                 self.notify(message='No game selected, select one then try again.', severity="error")
+        elif event.button.id == "copy":
+            if not(website == ''):
+                pc.copy(website) # copy website to clipboard using pyperclip
+                self.notify(message="Copied!")
+            else:
+                self.notify(message="No game selected, select one then try again.", severity="error")
 
 test().run()
