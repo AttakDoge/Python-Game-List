@@ -1,12 +1,24 @@
 import json
 import pandas as pd
+import os
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll, Horizontal # how do these work
-from textual.widgets import Footer, RadioButton, RadioSet, Label, Collapsible
+from textual.widgets import Footer, RadioButton, RadioSet, Label, Button, Markdown
 
+def stars(number):
+    empty = 5 - number
+    star = '★' * number + '☆' * empty
+    return star
+
+launch_loc = ''
+exe = ''
+top_title = """\
+## Game Selector
+"""
 class test(App):
     BINDINGS = [('Q', 'quit', 'Quit')]
     def compose(self) -> ComposeResult:
+        yield Markdown(top_title)
         with VerticalScroll(): # allows for scrolling
             with open('ex_format.json', 'r') as openfile: # loading ex_format.json, will change this in the future to be more user friendly or smth
                 data = json.load(openfile) # turns json file into array (see test2.py)
@@ -15,10 +27,13 @@ class test(App):
             with RadioSet():
                 for x in game_data['name']: # add game names to radio list
                     yield RadioButton(x)
-        with VerticalScroll():
-            yield Label(id="name")
-            yield Label(id="dev")
-            yield Label(id="tags")
+        with VerticalScroll(): # Game data display
+            yield Label("Game Name: ", id="name")
+            yield Label("Developer: ", id="dev")
+            yield Label("Tags: ", id="tags")
+            yield Label("Date added: ", id='date_added')
+            yield Label("Rating: ", id='rating')
+            yield Button("Launch Game", id='launch', variant='primary') # button to launch game
         yield Footer()
     
     def action_quit(self):
@@ -32,10 +47,36 @@ class test(App):
         '''
 
         global game_data
+        global launch_loc
+        global exe
         game = game_data.iloc[event.radio_set.pressed_index]
 
         self.query_one('#name', Label).update("Game Name: " + game['name'])
         self.query_one('#dev', Label).update("Developer: " + game['developer'])
         self.query_one('#tags', Label).update("Tags: " + ", ".join(game['tags']))
+        self.query_one('#date_added', Label).update("Date added: " + game['date_added'])
+        self.query_one('#rating', Label).update("Rating: " + stars(game['rating']))
+        launch_loc = game['path_to_game']
+        exe = game['game_exe']
+    
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == 'launch':
+            global launch_loc
+            global exe
+            if not(launch_loc == ''):
+                self.notify(message='Placeholder, will launch app in future: ' + launch_loc + exe)
+                # code not ready yet to test, no actual testing data yet
+                '''
+                cwd = os.getcwd()
+                try:
+                    os.chdir(launch_loc)
+                    os.startfile(exe)
+                except Exception as e:
+                    self.notify(f'App could not start due to error: {e}')
+                finally:
+                    os.chdir(cwd)
+                '''
+            else:
+                self.notify(message='No game selected, select one then try again.', severity="error")
 
 test().run()

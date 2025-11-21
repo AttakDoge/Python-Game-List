@@ -9,7 +9,8 @@
         ],
         "date_added": "01-01-1999",
         "rating": 0,
-        "path_to_game": "D:/foo/bar.exe"
+        "path_to_game": "D:/foo/",
+        "game_exe": "bar.exe"
     },
     {
         "name": "ghjk",
@@ -21,6 +22,7 @@
         ],
         "date_added": "12-31-2024",
         "rating": 5,
-        "path_to_game": "D:/bar/foo.exe"
+        "path_to_game": "D:/bar/",
+        "game_exe": "foo.exe"
     }
 ]
